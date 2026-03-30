@@ -13,6 +13,7 @@ from app.services.indicator_service import compute_stats_standard_indicators
 from app.services.indicator_service import compute_consommables_indicators
 from app.services.indicator_service import compute_pssm_indicators
 
+from app.charts.stats_standard_charts import plot_appels_par_mois
 
 """ Deux fonctions pour un affichage plus propre dans le terminal """
 def print_section(title: str):
@@ -79,6 +80,9 @@ def main():
     df_stat = parse_stat_activite_file(path)
     print(df_stat.head(30))
     print()
+
+    plot_appels_par_mois(df_stats)
+    print("Graphique généré : output/charts/appels_par_mois.png")
 
 if __name__ == "__main__":
     main()
