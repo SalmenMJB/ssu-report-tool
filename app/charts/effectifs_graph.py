@@ -1,24 +1,9 @@
-from docx import Document
+#from docx import Document
 # import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from app.parsers.effectifs import parse_effectifs_file
 
-
-# doc = Document("Rapport_activite_2024-2025_avec_commentaires.docx")
-
-# remplacements = {"{{85}}": "test"}
-# for p in doc.paragraphs:
-#     for cle, valeur in remplacements.items():
-#         if cle in p.text:
-#             p.text = p.text.replace(cle, valeur)
-
-# doc.save("test.docx")
-
-
-# =========================
-# 1) Lecture du CSV
-# =========================
 
 def generer_graph_effectifs():
     csv_path = "data/raw/evolution_etab_conventionnes.xlsx" # adapter le chemin si besoin
@@ -33,9 +18,6 @@ def generer_graph_effectifs():
         pourcentages.append(round(calcul,2))
     print(pourcentages)
 
-    # =========================
-    # 5) Couleurs proches de l'image
-    # =========================
     couleurs = {"#006400", # vert foncé,
                 "#008000", # vert
                 "#6B8E23", # vert jaunâtre
@@ -47,9 +29,6 @@ def generer_graph_effectifs():
                 "#8B4513" # marron
                 }
 
-    # =========================
-    # 6) Camembert
-    # =========================
     fig, ax = plt.subplots(figsize=(12, 8))
 
     wedges, _ = ax.pie(
@@ -62,9 +41,6 @@ def generer_graph_effectifs():
 
     ax.set(aspect="equal")
 
-    # =========================
-    # 7) Étiquettes dans des boîtes avec flèches
-    # =========================
     for wedge, cat, pct in zip(wedges, labels, pourcentages):
         angle = (wedge.theta2 + wedge.theta1) / 2
         x = np.cos(np.deg2rad(angle))
@@ -87,7 +63,6 @@ def generer_graph_effectifs():
             arrowprops=dict(arrowstyle="-", color="#9e9e9e", lw=1.2, shrinkA=0, shrinkB=0)
         )
 
-    # Cadre léger comme dans le document
     for spine in ax.spines.values():
         spine.set_visible(True)
         spine.set_edgecolor("#d9d9d9")
@@ -96,6 +71,5 @@ def generer_graph_effectifs():
     plt.tight_layout()
 
 
-    # Sauvegarder :
     plt.savefig("output/charts/fig1.png", dpi=300, bbox_inches="tight")
     plt.show()

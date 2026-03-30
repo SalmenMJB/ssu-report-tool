@@ -3,8 +3,8 @@ from app.parsers.activites_ide import parse_ide_file
 from app.parsers.effectifs import parse_effectifs_file
 from app.parsers.stats_standard import parse_stats_standard_file
 from app.parsers.consommables import parse_consommables_file
-from app.parsers.pssm import parse_pssm_file
 from app.parsers.stat_activite import parse_stat_activite_file
+from app.parsers.pssm import parse_pssm_file
 
 from app.services.indicator_service import  compute_dspe_indicators
 from app.services.indicator_service import compute_ide_indicators
@@ -14,6 +14,7 @@ from app.services.indicator_service import compute_consommables_indicators
 from app.services.indicator_service import compute_pssm_indicators
 
 from app.charts.stats_standard_charts import plot_appels_par_mois
+from app.charts.effectifs_graph import generer_graph_effectifs
 
 """ Deux fonctions pour un affichage plus propre dans le terminal """
 def print_section(title: str):
@@ -64,7 +65,6 @@ def main():
     consommables_stats = compute_consommables_indicators(df_consommables)
     print_indicators(consommables_stats)
 
-
     print_section("PSSM")
     pssm_path = "data/raw/recap_pssm.xlsx"
     pssm_sheets = parse_pssm_file(pssm_path)
@@ -83,6 +83,8 @@ def main():
 
     plot_appels_par_mois(df_stats)
     print("Graphique généré : output/charts/appels_par_mois.png")
+
+    generer_graph_effectifs()
 
 if __name__ == "__main__":
     main()
