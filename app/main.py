@@ -13,6 +13,8 @@ from app.services.indicator_service import compute_stats_standard_indicators
 from app.services.indicator_service import compute_consommables_indicators
 from app.services.indicator_service import compute_pssm_indicators
 
+from app.charts.effectifs_graph import generer_graph_effectifs
+
 
 """ Deux fonctions pour un affichage plus propre dans le terminal """
 def print_section(title: str):
@@ -79,6 +81,8 @@ def main():
     df_stat = parse_stat_activite_file(path)
     print(df_stat.head(30))
     print()
+
+    generer_graph_effectifs()
 
 if __name__ == "__main__":
     main()
