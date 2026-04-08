@@ -239,5 +239,10 @@ def main():
     # plot_origine_stagiaires_pssm(df_pssm)
     # print("Graphique généré : output/charts/origine_pssm.png")
 
+    #### RAPPORT WORD ####
+    print_section("Génération du rapport Word")
+    from app.generate_report import main as generate_report
+    generate_report()
+
 if __name__ == "__main__":
     main()
