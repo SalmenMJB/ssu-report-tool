@@ -466,6 +466,13 @@ class ReportBuilder:
         if os.path.isfile(image_path):
             para = self.document.add_paragraph()
             para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Use auto line spacing (lineRule="auto") so the paragraph expands
+            # to fit the image. Without this, the Normal style's exact 14 pt
+            # line height (lineRule="exact") clips the image in Word and
+            # LibreOffice.
+            para.paragraph_format.line_spacing = 1.0
+            para.paragraph_format.space_before = Pt(6)
+            para.paragraph_format.space_after = Pt(6)
             run = para.add_run()
             run.add_picture(image_path, width=width)
         else:
@@ -477,6 +484,7 @@ class ReportBuilder:
         if caption:
             cap_para = self.document.add_paragraph(caption)
             cap_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            cap_para.paragraph_format.line_spacing = 1.0
             for run in cap_para.runs:
                 run.font.name = FONT_NAME
                 run.font.size = FONT_SIZE_CAPTION
