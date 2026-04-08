@@ -2,3 +2,5 @@ pandas
 openpyxl
 matplotlib
 numpy
+python-docx
+pillow
