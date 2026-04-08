@@ -50,14 +50,13 @@ def build_consommables_chapter(
         caption="Actions de prévention par site",
     )
 
-    # Chiffres clés
-    conso_indicators = {}
+    # Chiffres clés avec flèches bleues
     if "nombres_actions" in consommables_stats:
-        conso_indicators["Nombre d'actions de prévention"] = int(
-            consommables_stats["nombres_actions"]
+        builder.add_blue_arrow_paragraph(
+            f"Nombre d'actions de prévention : "
+            f"{int(consommables_stats['nombres_actions'])}"
         )
 
-    # Préservatifs
     total_preservatifs = sum(
         int(consommables_stats.get(f"total_{k}", 0))
         for k in [
@@ -69,8 +68,17 @@ def build_consommables_chapter(
         ]
     )
     if total_preservatifs:
-        conso_indicators["Préservatifs distribués"] = total_preservatifs
+        builder.add_blue_arrow_paragraph(
+            f"Préservatifs distribués : {total_preservatifs}"
+        )
 
+    conso_indicators = {}
+    if "nombres_actions" in consommables_stats:
+        conso_indicators["Nombre d'actions de prévention"] = int(
+            consommables_stats["nombres_actions"]
+        )
+    if total_preservatifs:
+        conso_indicators["Préservatifs distribués"] = total_preservatifs
     if "total_ethylo_0_5" in consommables_stats:
         conso_indicators["Éthylotests 0,5‰ distribués"] = int(
             consommables_stats["total_ethylo_0_5"]

@@ -54,3 +54,15 @@ def build_pssm_section(
         )
     if pssm_indicators:
         builder.add_key_indicators_table(pssm_indicators, title="Chiffres clés – PSSM")
+
+
+def build_pssm_chapter(
+    builder: ReportBuilder,
+    pssm_stats: dict,
+) -> None:
+    """
+    Construit le chapitre PSSM complet (Heading 1).
+    Alias de build_pssm_section pour une utilisation en chapitre autonome.
+    """
+    builder.add_chapter("Premiers Secours en Santé Mentale", INTRO_TEXT)
+    build_pssm_section(builder, pssm_stats)

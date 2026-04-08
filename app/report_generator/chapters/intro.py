@@ -38,7 +38,21 @@ def build_intro_chapter(
         caption="Consultations par centre",
     )
 
-    # Chiffres clés
+    # Chiffres clés avec flèches bleues
+    if "total_consultations" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Total consultations : {int(activite_stats['total_consultations'])}"
+        )
+    if "etudiants_uniques" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Étudiant·e·s uniques : {int(activite_stats['etudiants_uniques'])}"
+        )
+    if "age_moyen" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Âge moyen : {activite_stats['age_moyen']:.1f} ans"
+        )
+
+    # Tableau des chiffres clés
     indicators = {}
     if "total_consultations" in activite_stats:
         indicators["Total consultations"] = int(activite_stats["total_consultations"])
