@@ -49,7 +49,17 @@ def build_medecine_chapter(
         caption="Répartition de l'activité médicale",
     )
 
-    # Chiffres clés
+    # Chiffres clés avec flèches bleues
+    if "consultations_medecine_generale" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Consultations médecine générale : "
+            f"{int(activite_stats['consultations_medecine_generale'])}"
+        )
+    if "consultations_bilans" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Bilans de prévention : {int(activite_stats['consultations_bilans'])}"
+        )
+
     med_indicators = {}
     if "consultations_medecine_generale" in activite_stats:
         med_indicators["Consultations médecine générale"] = int(

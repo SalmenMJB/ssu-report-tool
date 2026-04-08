@@ -57,7 +57,13 @@ def build_psy_chapter(
         caption="Durée de suivi en psychologie",
     )
 
-    # Chiffres clés
+    # Chiffres clés avec flèches bleues
+    if "consultations_psychologie" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Consultations psychologie : "
+            f"{int(activite_stats['consultations_psychologie'])}"
+        )
+
     psy_indicators = {}
     if "consultations_psychologie" in activite_stats:
         psy_indicators["Consultations psychologie"] = int(
@@ -76,6 +82,13 @@ def build_psychiatrie_chapter(
     """Construit le chapitre Psychiatrie."""
 
     builder.add_chapter("Psychiatrie", PSYCHIATRIE_INTRO_TEXT)
+
+    # Chiffres clés avec flèches bleues
+    if "consultations_psychiatrie" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Consultations psychiatrie : "
+            f"{int(activite_stats['consultations_psychiatrie'])}"
+        )
 
     psy_indicators = {}
     if "consultations_psychiatrie" in activite_stats:

@@ -40,7 +40,19 @@ def build_effectifs_chapter(
         caption="Appels reçus par mois",
     )
 
-    # Chiffres clés appels
+    # Chiffres clés appels avec flèches bleues
+    if "total_appels_latest_year" in stats_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Total appels : {int(stats_stats['total_appels_latest_year'])}"
+        )
+    if "latest_year" in stats_stats:
+        latest_year_label = stats_stats["latest_year"]
+        if latest_year_label.startswith("appels_"):
+            latest_year_label = latest_year_label[len("appels_"):]
+        builder.add_blue_arrow_paragraph(
+            f"Année de référence : {latest_year_label}"
+        )
+
     appels_indicators = {}
     if "total_appels_latest_year" in stats_stats:
         appels_indicators["Total appels"] = int(stats_stats["total_appels_latest_year"])
@@ -60,7 +72,7 @@ def build_effectifs_chapter(
         caption="Top établissements (dernière année)",
     )
 
-    # Chiffres clés effectifs
+    # Chiffres clés effectifs avec flèches bleues
     effectifs_indicators = {}
     for key, value in effectifs_stats.items():
         if key.startswith("total_") and "/" in key:

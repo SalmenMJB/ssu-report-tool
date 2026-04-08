@@ -15,7 +15,7 @@ Usage :
 from __future__ import annotations
 
 import os
-from typing import Optional
+from typing import List, Optional, Union
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -25,12 +25,17 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Inches, Pt, RGBColor
 
 from app.report_generator.styles import (
+    ARROW_LEVEL1,
+    ARROW_LEVEL2,
     COLOR_BLACK,
     COLOR_BLUE,
     COLOR_BLUE_LIGHT,
+    COLOR_BLUE_PALE,
+    COLOR_GRAY_LIGHT,
     COLOR_TABLE_HEADER,
     COLOR_TABLE_ROW_EVEN,
     COLOR_TABLE_ROW_ODD,
+    COLOR_UA_BLUE,
     COLOR_WHITE,
     FONT_NAME,
     FONT_SIZE_BODY,
@@ -51,7 +56,7 @@ from app.report_generator.styles import (
 
 def _set_cell_background(cell, color: RGBColor) -> None:
     """Définit la couleur de fond d'une cellule de tableau."""
-    hex_color = str(color)  # RGBColor.__str__ retourne le code hexadécimal, ex. "0ABBEF"
+    hex_color = str(color)  # RGBColor.__str__ retourne le code hexadécimal, ex. "00A8E1"
     tc = cell._tc
     tcPr = tc.get_or_add_tcPr()
     shd = OxmlElement("w:shd")
@@ -68,6 +73,19 @@ def _set_run_font(run, name: str, size: Pt, bold: bool = False,
     run.font.bold = bold
     if color is not None:
         run.font.color.rgb = color
+
+
+def _set_cell_border(cell, border_color_hex: str = "00A8E1") -> None:
+    """Définit une bordure colorée sur une cellule."""
+    tc = cell._tc
+    tcPr = tc.get_or_add_tcPr()
+    for border_tag in ("w:top", "w:left", "w:bottom", "w:right"):
+        border = OxmlElement(border_tag)
+        border.set(qn("w:val"), "single")
+        border.set(qn("w:sz"), "12")
+        border.set(qn("w:space"), "0")
+        border.set(qn("w:color"), border_color_hex)
+        tcPr.append(border)
 
 
 # ---------------------------------------------------------------------------
@@ -98,27 +116,36 @@ class ReportBuilder:
         normal = self.document.styles["Normal"]
         normal.font.name = FONT_NAME
         normal.font.size = FONT_SIZE_BODY
+        normal.paragraph_format.space_before = Pt(4)
+        normal.paragraph_format.space_after = Pt(8)
+        normal.paragraph_format.line_spacing = Pt(14)
 
-        # Heading 1 — bleu ciel UA
+        # Heading 1 — bleu ciel UA, grand, sans numérotation visible
         h1 = self.document.styles["Heading 1"]
         h1.font.name = FONT_NAME
         h1.font.size = FONT_SIZE_H1
         h1.font.bold = True
         h1.font.color.rgb = COLOR_BLUE
+        h1.paragraph_format.space_before = Pt(18)
+        h1.paragraph_format.space_after = Pt(12)
 
-        # Heading 2
+        # Heading 2 — bleu ciel UA
         h2 = self.document.styles["Heading 2"]
         h2.font.name = FONT_NAME
         h2.font.size = FONT_SIZE_H2
         h2.font.bold = True
         h2.font.color.rgb = COLOR_BLUE_LIGHT
+        h2.paragraph_format.space_before = Pt(14)
+        h2.paragraph_format.space_after = Pt(8)
 
-        # Heading 3
+        # Heading 3 — bleu ciel UA, légèrement plus petit
         h3 = self.document.styles["Heading 3"]
         h3.font.name = FONT_NAME
         h3.font.size = FONT_SIZE_H3
         h3.font.bold = True
         h3.font.color.rgb = COLOR_BLUE_LIGHT
+        h3.paragraph_format.space_before = Pt(10)
+        h3.paragraph_format.space_after = Pt(6)
 
         # Numéro de page dans le pied de page
         self._add_page_numbers()
@@ -160,26 +187,33 @@ class ReportBuilder:
         subtitle: str = "2024 – 2025",
         logo_path: Optional[str] = None,
     ) -> None:
-        """Génère la page de titre avec logo optionnel, titre et sous-titre."""
+        """Génère la page de titre avec design minimaliste : logo, titre et sous-titre."""
 
-        # Logo — on n'insère que si le fichier existe
+        # Logo — on n'insère que si le fichier existe (taille réduite : 4,5 cm)
         if logo_path and os.path.isfile(logo_path):
             logo_para = self.document.add_paragraph()
             logo_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
             run = logo_para.add_run()
-            run.add_picture(logo_path, width=Cm(6))
+            run.add_picture(logo_path, width=Cm(4.5))
 
         # Espace avant le titre
-        for _ in range(3):
+        for _ in range(4):
             self.document.add_paragraph()
 
         # Titre principal
         title_para = self.document.add_paragraph()
         title_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = title_para.add_run(title.upper())
-        _set_run_font(run, FONT_NAME, FONT_SIZE_TITLE, bold=True, color=COLOR_BLUE)
+        _set_run_font(run, FONT_NAME, FONT_SIZE_TITLE, bold=True, color=COLOR_UA_BLUE)
 
-        # Sous-titre
+        # Ligne décorative bleue sous le titre
+        separator_para = self.document.add_paragraph()
+        separator_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        sep_run = separator_para.add_run("─" * 30)
+        sep_run.font.color.rgb = COLOR_UA_BLUE
+        sep_run.font.size = Pt(12)
+
+        # Sous-titre (année)
         subtitle_para = self.document.add_paragraph()
         subtitle_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = subtitle_para.add_run(subtitle)
@@ -190,14 +224,16 @@ class ReportBuilder:
         service_para = self.document.add_paragraph()
         service_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = service_para.add_run("Service de Santé Universitaire")
-        _set_run_font(run, FONT_NAME, FONT_SIZE_H2, bold=True, color=COLOR_BLACK)
+        _set_run_font(run, FONT_NAME, FONT_SIZE_H2, bold=True, color=COLOR_UA_BLUE)
 
         univ_para = self.document.add_paragraph()
         univ_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
         run = univ_para.add_run("Université d'Angers")
         _set_run_font(run, FONT_NAME, FONT_SIZE_H3, bold=False, color=COLOR_BLACK)
 
-        # Saut de page
+        # Saut de page (page blanche entre couverture et sommaire)
+        self.document.add_page_break()
+        self.document.add_paragraph()
         self.document.add_page_break()
 
     # ------------------------------------------------------------------
@@ -273,6 +309,132 @@ class ReportBuilder:
         para = self.document.add_paragraph(text)
         para.style = self.document.styles["Normal"]
 
+    def add_section_subtitle(self, text: str) -> None:
+        """Ajoute un sous-titre en italique bleu ciel pour structurer les sections."""
+        para = self.document.add_paragraph()
+        para.paragraph_format.space_before = Pt(8)
+        para.paragraph_format.space_after = Pt(4)
+        run = para.add_run(text)
+        run.font.name = FONT_NAME
+        run.font.size = FONT_SIZE_H3
+        run.font.italic = True
+        run.font.bold = False
+        run.font.color.rgb = COLOR_UA_BLUE
+
+    def add_blue_arrow_paragraph(self, text: str) -> None:
+        """
+        Ajoute un paragraphe avec une flèche bleue ➠ en préfixe.
+        Utilisé pour mettre en valeur les données clés et points importants.
+        """
+        para = self.document.add_paragraph()
+        para.paragraph_format.space_before = Pt(4)
+        para.paragraph_format.space_after = Pt(4)
+        para.paragraph_format.left_indent = Cm(0.5)
+
+        # Flèche en bleu
+        arrow_run = para.add_run(f"{ARROW_LEVEL1} ")
+        arrow_run.font.name = FONT_NAME
+        arrow_run.font.size = FONT_SIZE_BODY
+        arrow_run.font.bold = True
+        arrow_run.font.color.rgb = COLOR_UA_BLUE
+
+        # Texte en noir
+        text_run = para.add_run(text)
+        text_run.font.name = FONT_NAME
+        text_run.font.size = FONT_SIZE_BODY
+        text_run.font.color.rgb = COLOR_BLACK
+
+    def add_nested_arrow_list(
+        self,
+        items: List[Union[str, tuple]],
+    ) -> None:
+        """
+        Ajoute une liste imbriquée avec flèches bleues.
+
+        Chaque élément peut être :
+        - Une chaîne de caractères (niveau 1 : ➠)
+        - Un tuple (str, list[str]) : texte niveau 1 + sous-éléments niveau 2 (➠➠)
+
+        Exemple :
+            builder.add_nested_arrow_list([
+                "Point principal 1",
+                ("Point principal 2", ["Sous-point A", "Sous-point B"]),
+                "Point principal 3",
+            ])
+        """
+        for item in items:
+            if isinstance(item, tuple):
+                label, sub_items = item
+                # Niveau 1
+                para = self.document.add_paragraph()
+                para.paragraph_format.space_before = Pt(3)
+                para.paragraph_format.space_after = Pt(3)
+                para.paragraph_format.left_indent = Cm(0.5)
+                arrow_run = para.add_run(f"{ARROW_LEVEL1} ")
+                arrow_run.font.name = FONT_NAME
+                arrow_run.font.size = FONT_SIZE_BODY
+                arrow_run.font.bold = True
+                arrow_run.font.color.rgb = COLOR_UA_BLUE
+                text_run = para.add_run(label)
+                text_run.font.name = FONT_NAME
+                text_run.font.size = FONT_SIZE_BODY
+                text_run.font.color.rgb = COLOR_BLACK
+
+                # Niveau 2
+                for sub in sub_items:
+                    sub_para = self.document.add_paragraph()
+                    sub_para.paragraph_format.space_before = Pt(2)
+                    sub_para.paragraph_format.space_after = Pt(2)
+                    sub_para.paragraph_format.left_indent = Cm(1.2)
+                    sub_arrow = sub_para.add_run(f"{ARROW_LEVEL2} ")
+                    sub_arrow.font.name = FONT_NAME
+                    sub_arrow.font.size = Pt(10)
+                    sub_arrow.font.color.rgb = COLOR_UA_BLUE
+                    sub_text = sub_para.add_run(sub)
+                    sub_text.font.name = FONT_NAME
+                    sub_text.font.size = Pt(10)
+                    sub_text.font.color.rgb = RGBColor(0x40, 0x40, 0x40)
+            else:
+                # Niveau 1 simple
+                para = self.document.add_paragraph()
+                para.paragraph_format.space_before = Pt(3)
+                para.paragraph_format.space_after = Pt(3)
+                para.paragraph_format.left_indent = Cm(0.5)
+                arrow_run = para.add_run(f"{ARROW_LEVEL1} ")
+                arrow_run.font.name = FONT_NAME
+                arrow_run.font.size = FONT_SIZE_BODY
+                arrow_run.font.bold = True
+                arrow_run.font.color.rgb = COLOR_UA_BLUE
+                text_run = para.add_run(item)
+                text_run.font.name = FONT_NAME
+                text_run.font.size = FONT_SIZE_BODY
+                text_run.font.color.rgb = COLOR_BLACK
+
+    def add_blue_box(self, text: str, border_color: str = "00A8E1") -> None:
+        """
+        Ajoute une boîte de texte encadrée en bleu ciel.
+        Simulée par un tableau à 1 cellule avec bordure colorée et fond blanc.
+        """
+        table = self.document.add_table(rows=1, cols=1)
+        table.alignment = WD_TABLE_ALIGNMENT.CENTER
+
+        cell = table.rows[0].cells[0]
+        _set_cell_background(cell, COLOR_WHITE)
+        _set_cell_border(cell, border_color)
+
+        para = cell.paragraphs[0]
+        para.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        para.paragraph_format.space_before = Pt(4)
+        para.paragraph_format.space_after = Pt(4)
+        para.paragraph_format.left_indent = Cm(0.3)
+        run = para.add_run(text)
+        run.font.name = FONT_NAME
+        run.font.size = FONT_SIZE_BODY
+        run.font.color.rgb = COLOR_BLACK
+
+        # Espace après la boîte
+        self.document.add_paragraph()
+
     def add_editable_comment_zone(
         self, placeholder: str = "[À compléter par l'équipe SSU]"
     ) -> None:
@@ -332,7 +494,7 @@ class ReportBuilder:
     ) -> None:
         """
         Crée un tableau à deux colonnes (Indicateur | Valeur) à partir
-        d'un dictionnaire. Le fond des lignes alterne pour la lisibilité.
+        d'un dictionnaire. En-tête bleu ciel, alternance gris clair / bleu pâle.
         """
         if not indicators:
             return
@@ -357,7 +519,7 @@ class ReportBuilder:
             run.font.bold = True
             run.font.color.rgb = COLOR_WHITE
 
-        # Lignes de données
+        # Lignes de données : alternance gris clair / bleu pâle
         for idx, (key, value) in enumerate(indicators.items()):
             row_cells = table.add_row().cells
             bg = COLOR_TABLE_ROW_ODD if idx % 2 == 0 else COLOR_TABLE_ROW_EVEN

@@ -47,7 +47,12 @@ def build_ide_chapter(
         caption="Répartition de l'activité réelle",
     )
 
-    # Chiffres clés
+    # Chiffres clés avec flèches bleues
+    if "consultations_ide" in activite_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Consultations IDE : {int(activite_stats['consultations_ide'])}"
+        )
+
     ide_indicators = {}
     if "consultations_ide" in activite_stats:
         ide_indicators["Consultations IDE"] = int(activite_stats["consultations_ide"])
