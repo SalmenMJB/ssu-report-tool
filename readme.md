@@ -1,62 +1,99 @@
 ====== STRUCTURE DU PROJET:
 
 ssu-report-tool/
-│
 ├── app/
 │   ├── __init__.py
-│   ├── config.py
-│   ├── main.py
-│   │
+│   ├── generate_report.py: python -m app.generate_report
+│   │ 
 │   ├── parsers/
 │   │   ├── __init__.py
-│   │   ├── calcium_standard.py
-│   │   ├── activites_ide.py
-│   │   ├── seances_dspe.py
-│   │   └── effectifs.py
+│   │   ├── effectifs.py
+│   │   ├── stats_standard.py
+│   │   ├── consommables.py
+│   │   ├── stat_activite.py
+│   │   ├── pssm.py
+│   │   └── psy.py
 │   │
 │   ├── services/
 │   │   ├── __init__.py
-│   │   ├── import_service.py
-│   │   ├── indicator_service.py
-│   │   ├── chart_service.py
-│   │   └── report_service.py
+│   │   └── indicator_service.py
 │   │
-│   ├── models/
+│   ├── report_generator/
 │   │   ├── __init__.py
-│   │   └── schemas.py
-│   │
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── excel_helpers.py
-│   │   ├── cleaning.py
-│   │   └── logging_utils.py
+│   │   ├── document_builder.py: MAJOR
+│   │   ├── styles.py: Gestion centralisée des styles
+│   │   ├── colors.py NOUVEAU: Palette de couleurs
+│   │   ├── graphics_helper.py: Graphiques avancés
+│   │   ├── layout_helper.py: Mise en page
+│   │   │
+│   │   └── chapters/
+│   │       ├── __init__.py
+│   │       ├── intro.py
+│   │       ├── effectifs.py
+│   │       ├── medecine.py
+│   │       ├── ide.py
+│   │       ├── consommables.py: Éducation à la santé
+│   │       ├── pssm.py
+│   │       ├── dspe.py: DSPE/Psychologie/Psychiatrie/Santé mentale
+│   │       ├── css.py: Centre de santé sexuelle
+│   │       ├── dietetique.py: NOUVEAU - Diététique et Nutrition
+│   │       └── partenariats.py
 │   │
 │   └── templates/
-│       ├── report.html
-│       ├── sections/
-│       │   ├── intro.html
-│       │   ├── medecine.html
-│       │   ├── ide.html
-│       │   ├── dspe.html
-│       │   └── effectifs.html
-│       └── assets/
-│           └── style.css
-│
-├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── sample/
+│       ├── assets/
+│       │   ├── logo_ua.png
+│       │   └── colors_config.json: Config couleurs
+│       │
+│       └── defaults/
+│           ├── bullet_style.py
+│           ├── table_style.py
+│           └── chart_style.py
 │
 ├── output/
-│   ├── reports/
-│   └── charts/
+│   ├── rapport_ssu_2024_2025.docx (GÉNÉRÉ)
+│   └── charts/: Graphiques générés
+│       ├── pssm_sessions.png
+│       ├── activity_pie.png
+│       ├── consultation_bar.png
+│       └── ... (autres graphiques)
+│
+├── data/
+│   └── raw/: SOURCES (tableaux EXCEL)
+│   |    ├── evolution_etab_conventionnes.xlsx
+│   |    ├── stats_standard_ssu.xlsx
+│   |    ├── stat_activite.xlsx
+│   |    ├── extraction_consommables_actions_24_25.xlsx
+│   |    ├── recap_pssm.xlsx
+|   |    ├── stats_psy.xlsx
+│   |    └── (autres...)   
+|   |____ processed/: SOURCES collectés à la main depuis l'ancien rapport (à garder sauf trouver des vraies valeurs)
 │
 ├── tests/
-│   ├── test_parsers.py
-│   ├── test_indicators.py
-│   └── test_report.py
+│   ├── __init__.py
+│   ├── test_document_builder.py
+│   ├── test_styles.py
+│   ├── test_graphics.py
+│   └── test_chapters/
+│       ├── __init__.py
+│       ├── test_intro.py
+│       ├── test_effectifs.py
+│       └── ... (tests par chapitre)
 │
-├── requirements.txt
+├── config/
+│   ├── __init__.py
+│   ├── report_config.py: Config globale
+│   ├── styles_config.json: Styles en JSON
+│   └── colors_config.json: Palette de couleurs
+│
+├── docs/
+│   ├── ARCHITECTURE.md
+│   ├── STYLES_GUIDE.md: Guide des styles
+│   ├── GRAPHICS_GUIDE.md: Types de graphiques
+│   ├── CHAPTERS_STRUCTURE.md
+│   └── API_REFERENCE.md
+│
+│
+├── requirements.txt: bibliothèques à installer: pip install -r requirements.txt
 ├── README.md
 └── .gitignore
 
@@ -88,7 +125,7 @@ C’est le cœur du projet.
         retourner un DataFrame propre
 
 **app/services/**
-    Ici, tu mets la logique métier.
+    Ici, on mets la logique métier.
     Par exemple : 
         _import_service.py_
             coordonne l’import de plusieurs fichiers
@@ -105,7 +142,7 @@ C’est le cœur du projet.
 
 **app/models/**
     Pas forcément une “base de données” tout de suite.
-    Tu peux y mettre des structures de données simples :
+    on peut y mettre des structures de données simples :
         noms de colonnes normalisés
         objets métier
         formats attendus

@@ -36,7 +36,6 @@ from app.report_generator.chapters.effectifs import build_effectifs_chapter
 from app.report_generator.chapters.medecine import build_medecine_chapter
 from app.report_generator.chapters.ide import build_ide_chapter
 from app.report_generator.chapters.consommables import build_consommables_chapter
-from app.report_generator.chapters.pssm import build_pssm_chapter
 from app.report_generator.chapters.dspe import (
     build_psy_chapter,
     build_psychiatrie_chapter,

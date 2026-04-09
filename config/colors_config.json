@@ -1,0 +1,72 @@
+{
+  "palette": {
+    "primary": {
+      "name": "Bleu ciel",
+      "hex": "#0099CC",
+      "rgb": [0, 153, 204],
+      "usage": "Titres, en-têtes, flèches, bordures"
+    },
+    "secondary": {
+      "name": "Noir",
+      "hex": "#333333",
+      "rgb": [51, 51, 51],
+      "usage": "Texte courant, sous-titres gras, mots clés"
+    },
+    "light": {
+      "name": "Gris clair",
+      "hex": "#F5F5F5",
+      "rgb": [245, 245, 245],
+      "usage": "Encadrés graphiques, lignes alternées"
+    },
+    "accent_orange": {
+      "name": "Orange",
+      "hex": "#FFA500",
+      "rgb": [255, 165, 0],
+      "usage": "Graphiques, mises en avant"
+    },
+    "accent_green": {
+      "name": "Vert",
+      "hex": "#4CAF50",
+      "rgb": [76, 175, 80],
+      "usage": "Graphiques, positif"
+    },
+    "accent_red": {
+      "name": "Rouge",
+      "hex": "#F44336",
+      "rgb": [244, 67, 54],
+      "usage": "Graphiques, négatif"
+    },
+    "accent_yellow": {
+      "name": "Jaune",
+      "hex": "#FFEB3B",
+      "rgb": [255, 235, 59],
+      "usage": "Graphiques"
+    },
+    "accent_blue_dark": {
+      "name": "Bleu foncé",
+      "hex": "#1976D2",
+      "rgb": [25, 118, 210],
+      "usage": "Graphiques, contraste"
+    },
+    "accent_turquoise": {
+      "name": "Turquoise",
+      "hex": "#00BCD4",
+      "rgb": [0, 188, 212],
+      "usage": "Graphiques, alternance"
+    }
+  },
+  "chart_palettes": {
+    "pie_chart": ["#0099CC", "#FFA500", "#333333", "#F5F5F5", "#4CAF50", "#FFEB3B"],
+    "bar_chart_single": ["#0099CC"],
+    "bar_chart_comparison": ["#00BCD4", "#1976D2"],
+    "line_chart": ["#0099CC", "#F44336"],
+    "gradient": ["#E3F2FD", "#0099CC", "#003D7A"]
+  },
+  "text_colors": {
+    "title": "#0099CC",
+    "heading": "#0099CC",
+    "body": "#333333",
+    "emphasis": "#333333",
+    "hyperlink": "#0099CC"
+  }
+}

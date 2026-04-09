@@ -1,0 +1,108 @@
+{
+  "fonts": {
+    "default": {
+      "name": "Calibri",
+      "size": 11,
+      "color": "#333333"
+    },
+    "title": {
+      "name": "Calibri",
+      "size": 28,
+      "bold": true,
+      "color": "#0099CC",
+      "alignment": "center"
+    },
+    "heading1": {
+      "name": "Calibri",
+      "size": 20,
+      "bold": true,
+      "color": "#0099CC"
+    },
+    "heading2": {
+      "name": "Calibri",
+      "size": 16,
+      "bold": true,
+      "color": "#0099CC"
+    },
+    "heading3": {
+      "name": "Calibri",
+      "size": 13,
+      "bold": true,
+      "italic": false,
+      "color": "#333333"
+    },
+    "bullet": {
+      "name": "Calibri",
+      "size": 11,
+      "color": "#333333",
+      "icon": "➡️"
+    },
+    "emphasis": {
+      "name": "Calibri",
+      "size": 11,
+      "bold": true,
+      "color": "#333333"
+    }
+  },
+  "paragraphs": {
+    "default": {
+      "alignment": "left",
+      "line_spacing": 1.15,
+      "space_before": 6,
+      "space_after": 6
+    },
+    "title": {
+      "alignment": "center",
+      "line_spacing": 1.0,
+      "space_before": 12,
+      "space_after": 12
+    },
+    "heading": {
+      "alignment": "left",
+      "line_spacing": 1.15,
+      "space_before": 12,
+      "space_after": 6
+    },
+    "bullet": {
+      "alignment": "left",
+      "line_spacing": 1.15,
+      "space_before": 0,
+      "space_after": 3,
+      "indent_left": 0.5
+    },
+    "highlighted_box": {
+      "alignment": "left",
+      "line_spacing": 1.15,
+      "space_before": 12,
+      "space_after": 12,
+      "border": true,
+      "border_color": "#0099CC",
+      "border_width": 2
+    }
+  },
+  "tables": {
+    "default": {
+      "header_background": "#0099CC",
+      "header_font_color": "FFFFFF",
+      "row_alternate_color": "#F5F5F5",
+      "border_color": "#CCCCCC",
+      "border_width": 1,
+      "cell_padding": 6
+    },
+    "key_indicators": {
+      "header_background": "#0099CC",
+      "header_font_color": "FFFFFF",
+      "row_background": "#E3F2FD",
+      "border_color": "#0099CC"
+    }
+  },
+  "spacing": {
+    "before_section": 12,
+    "after_section": 12,
+    "before_subsection": 6,
+    "after_subsection": 6,
+    "before_chart": 12,
+    "after_chart": 12,
+    "line_spacing": 1.15
+  }
+}

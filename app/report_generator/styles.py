@@ -44,18 +44,18 @@ FONT_SIZE_BODY = Pt(11)
 FONT_SIZE_CAPTION = Pt(9)
 
 # ---------------------------------------------------------------------------
-# Marges du document (2,5 cm sur chaque côté — identiques au doc de référence)
+# Marges du document (2 cm sur chaque côté — identiques au doc de référence)
 # ---------------------------------------------------------------------------
 
-MARGIN_CM = Cm(2.5)
+MARGIN_CM = Cm(2)
 
 # ---------------------------------------------------------------------------
 # Largeur utile d'une image dans le corps du texte (en Cm)
 # ---------------------------------------------------------------------------
 
-IMAGE_WIDTH_FULL = Cm(16)    # pleine largeur
-IMAGE_WIDTH_HALF = Cm(7.5)   # demi-largeur (deux images côte à côte)
-IMAGE_WIDTH_CHART = Cm(9)    # graphique centré standard (8-10 cm)
+IMAGE_WIDTH_FULL = Cm(14.5)    # pleine largeur
+IMAGE_WIDTH_HALF = Cm(7)   # demi-largeur (deux images côte à côte)
+IMAGE_WIDTH_CHART = Cm(12)    # graphique centré standard (8-10 cm)
 
 # ---------------------------------------------------------------------------
 # Couleurs de fond pour les tableaux de chiffres clés

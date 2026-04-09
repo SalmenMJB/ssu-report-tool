@@ -118,7 +118,13 @@ class ReportBuilder:
         normal.font.size = FONT_SIZE_BODY
         normal.paragraph_format.space_before = Pt(4)
         normal.paragraph_format.space_after = Pt(8)
-        normal.paragraph_format.line_spacing = Pt(14)
+        normal.paragraph_format.line_spacing = 1.15 # Interligne 1.15 (plus flexible que Pt(14))
+
+        # Forcer les titres à avoir un interligne automatique pour ne pas être coupés
+        for style_name in ["Heading 1", "Heading 2", "Heading 3"]:
+            style = self.document.styles[style_name]
+            style.paragraph_format.line_spacing = None # Reset l'interligne (Auto)
+            style.paragraph_format.line_spacing_rule = None
 
         # Heading 1 — bleu ciel UA, grand, sans numérotation visible
         h1 = self.document.styles["Heading 1"]
@@ -453,35 +459,33 @@ class ReportBuilder:
     # Images / graphiques
     # ------------------------------------------------------------------
 
-    def add_image(
-        self,
-        image_path: str,
-        width: float = IMAGE_WIDTH_FULL,
-        caption: str = "",
-    ) -> None:
-        """
-        Insère un graphique PNG avec une légende optionnelle.
-        Si le fichier n'existe pas, insère un espace réservé.
-        """
-        if os.path.isfile(image_path):
-            para = self.document.add_paragraph()
-            para.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            run = para.add_run()
-            run.add_picture(image_path, width=width)
-        else:
-            para = self.document.add_paragraph()
-            run = para.add_run(f"[Graphique manquant : {os.path.basename(image_path)}]")
-            run.font.italic = True
-            run.font.color.rgb = RGBColor(0xAA, 0x00, 0x00)
+    def add_image(self, image_path: str, width: float = IMAGE_WIDTH_FULL, caption: str = "") -> None:
+        if not os.path.isfile(image_path):
+            para = self.document.add_paragraph(f"[Image manquante : {os.path.basename(image_path)}]")
+            para.runs[0].font.italic = True
+            return
 
+        # Paragraphe pour l'image
+        para = self.document.add_paragraph()
+        para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # IMPORTANT : On s'assure que l'interligne n'écrase pas l'image
+        para.paragraph_format.line_spacing = 1.0 
+        para.paragraph_format.space_before = Pt(12)
+        para.paragraph_format.space_after = Pt(6)
+
+        run = para.add_run()
+        run.add_picture(image_path, width=width)
+        
         if caption:
             cap_para = self.document.add_paragraph(caption)
             cap_para.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            # Empêcher la légende d'être séparée de l'image sur une autre page
+            cap_para.paragraph_format.keep_with_previous = True 
             for run in cap_para.runs:
-                run.font.name = FONT_NAME
                 run.font.size = FONT_SIZE_CAPTION
                 run.font.italic = True
-                run.font.color.rgb = RGBColor(0x60, 0x60, 0x60)
+                run.font.color.rgb = RGBColor(100, 100, 100)
 
     # ------------------------------------------------------------------
     # Tableaux de chiffres clés
