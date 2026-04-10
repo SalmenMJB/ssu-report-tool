@@ -1,0 +1,89 @@
+════════════════════════════════════════════════════════════════
+  GÉNÉRATEUR DE RAPPORT SSU
+════════════════════════════════════════════════════════════════
+
+✅ AVANT DE COMMENCER :
+
+1. Préparez vos fichiers Excel avec les données 2025-2026 (ou la période voulue)
+   Peu importe comment ils s'appellent ! L'application les reconnaît.
+
+2. Placez TOUS vos fichiers dans le dossier "data/raw"
+
+3. Double-cliquez sur "run_app.bat" (Windows) 
+   ou lancez "python run_gui.py" (Linux/Mac)
+
+════════════════════════════════════════════════════════════════
+
+🔍 FICHIERS RECONNUS AUTOMATIQUEMENT :
+
+L'application identifie vos fichiers automatiquement :
+
+✓ OBLIGATOIRES (vous DEVEZ en avoir au moins un de chaque) :
+  • Effectifs par établissement
+    (noms possibles : effectifs.xlsx, evolution_*.xlsx, etc.)
+  
+  • Statistiques standard du SSU
+    (noms possibles : stats.xlsx, stats_standard*.xlsx, etc.)
+  
+  • Activité/Consultations
+    (noms possibles : activite.xlsx, stat_activite.xlsx, etc.)
+
+✓ OPTIONNELS (si vous les avez, on les inclut) :
+  • Consommables/Éducation santé
+  • PSSM (Premiers Secours)
+  • Psychologie
+
+════════════════════════════════════════════════════════════════
+
+📝 COMMENT UTILISER L'APPLICATION :
+
+1. L'interface s'ouvre automatiquement
+
+2. Cliquez sur "➕ Ajouter fichiers"
+   → Sélectionnez vos fichiers Excel dans data/raw
+
+3. L'application dit quels fichiers elle a reconnus
+   ✅ Si tout est bon, il y a des checkmarks verts
+
+4. Si vous voyez une ❌ ERREUR :
+   → C'est qu'il manque un fichier obligatoire
+   → Vérifiez que vous avez bien mis le fichier dans data/raw
+
+5. Cliquez sur "📄 GÉNÉRER LE RAPPORT"
+
+6. Attendez (ça prend quelques minutes)
+   → Vous verrez les étapes s'afficher en direct
+
+7. Quand c'est fini : "✅ Rapport généré avec succès !"
+   → Le fichier Word est dans le dossier "output/"
+
+════════════════════════════════════════════════════════════════
+
+🚨 SI VOUS AVEZ UNE ERREUR :
+
+L'interface vous dit exactement ce qui ne va pas.
+Par exemple :
+  ❌ "Fichier obligatoire manquant : Effectifs par établissement"
+  → Ça veut dire : Mettez un fichier d'effectifs dans data/raw
+
+  ❌ "Impossible d'identifier le rôle du fichier : mon_fichier.xlsx"
+  → Ça veut dire : Ce fichier n'est pas reconnu
+  → Vérifiez que c'est un fichier officiel
+
+════════════════════════════════════════════════════════════════
+
+💡 CONSEILS :
+
+• Les noms de fichiers n'importent PAS
+  (tant qu'ils contiennent le bon type de données)
+
+• Ne modifiez PAS la structure des dossiers
+  (data/, output/, etc.)
+
+• Gardez les fichiers Excel en .xlsx (pas .xls)
+
+• Si ça ne marche pas, contactez : contact@univ-angers.fr
+
+════════════════════════════════════════════════════════════════
+
+Bonne génération ! 🎉

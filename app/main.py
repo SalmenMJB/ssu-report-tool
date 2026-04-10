@@ -229,7 +229,6 @@ def main():
     plot_actions_par_site_lisible(sites)
     print("Graphique généré : output/charts/actions_par_site_lisible.png")
 
-
     
     plot_duree_suivi(df_activite)
     print("Graphique généré : output/charts/duree_suivi.png")

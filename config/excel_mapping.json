@@ -1,0 +1,53 @@
+{
+  "file_mappings": {
+    "effectifs": {
+      "description": "Fichier des effectifs par établissement",
+      "required": true,
+      "patterns": [
+        "evolution_etab_conventionnes.xlsx",
+        "evolution_*.xlsx",
+        "*effectifs*.xlsx"
+      ]
+    },
+    "stats_standard": {
+      "description": "Statistiques standard SSU",
+      "required": true,
+      "patterns": [
+        "stats_standard_ssu.xlsx",
+        "stats_standard*.xlsx"
+      ]
+    },
+    "activite": {
+      "description": "Statistiques d'activité",
+      "required": true,
+      "patterns": [
+        "stat_activite.xlsx",
+        "*activite*.xlsx"
+      ]
+    },
+    "consommables": {
+      "description": "Données de consommables/éducation santé",
+      "required": false,
+      "patterns": [
+        "extraction_consommables_actions_24_25.xlsx",
+        "*consommables*.xlsx"
+      ]
+    },
+    "pssm": {
+      "description": "Données PSSM",
+      "required": false,
+      "patterns": [
+        "recap_pssm.xlsx",
+        "*pssm*.xlsx"
+      ]
+    },
+    "psy": {
+      "description": "Données psychologie",
+      "required": false,
+      "patterns": [
+        "stats_psy.xlsx",
+        "*psy*.xlsx"
+      ]
+    }
+  }
+}
