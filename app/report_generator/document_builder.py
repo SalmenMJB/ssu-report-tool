@@ -461,7 +461,7 @@ class ReportBuilder:
 
     def add_image(self, image_path: str, width: float = IMAGE_WIDTH_FULL, caption: str = "") -> None:
         if not os.path.isfile(image_path):
-            para = self.document.add_paragraph(f"[Image manquante : {os.path.basename(image_path)}]")
+            para = self.document.add_paragraph(f"[Graphique manquant : {os.path.basename(image_path)}]")
             para.runs[0].font.italic = True
             return
 

@@ -311,12 +311,31 @@ def compute_bilan_actions_indicators(df):
         df = df.copy() if "theme" not in df.columns else df
         df["site"] = standardize_simple_labels(df["site"])
         indicators["actions_par_site"] = df["site"].value_counts(dropna=False)
+        # utiliser le site comme campus si pas de colonne campus
+        if "campus" not in df.columns:
+            indicators["actions_par_campus"] = indicators["actions_par_site"]
 
     if "campus" in df.columns:
         indicators["actions_par_campus"] = df["campus"].value_counts(dropna=False)
 
     if "nb_participants" in df.columns:
         indicators["total_participants"] = df["nb_participants"].fillna(0).sum()
+
+    # Calculer les totaux de consommables
+    consommables_cols = [
+        "preservatifs_externes", "preservatifs_xl", "preservatifs_skin",
+        "preservatifs_internes", "gel_lubrifiant", "digues", "depistages",
+        "ethylo_0_2", "ethylo_0_5", "reglettes_alcool", "capuchons_verre",
+        "livrets_cocktails", "eco_cup", "packs_arret_tabac", "roule_ta_paille",
+        "bouchons_oreille", "audiogrammes", "livret_recette_hiver",
+        "livret_recette_ete", "livret_recette_automne", "livret_recette_printemps",
+        "sur_sac_reflechissant",
+    ]
+    for col in consommables_cols:
+        if col in df.columns:
+            total = df[col].fillna(0).sum()
+            if total > 0:
+                indicators[f"total_{col}"] = total
 
     return indicators
 

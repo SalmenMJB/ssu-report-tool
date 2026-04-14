@@ -105,7 +105,7 @@ def _load_data():
         data["df_consommables"] = None
         data["consommables_stats"] = {}
 
-    bilan_actions_path = "data/raw/bilan_actions.xlsx"
+    bilan_actions_path = "data/raw/bilan_actions_25_26.xlsx"
     if os.path.isfile(bilan_actions_path):
         data["df_bilan_actions"] = parse_bilan_actions_file(bilan_actions_path)
         data["bilan_actions_stats"] = compute_bilan_actions_indicators(
@@ -115,7 +115,7 @@ def _load_data():
         data["df_bilan_actions"] = None
         data["bilan_actions_stats"] = {}
 
-    dspe_path = "data/raw/seances_dspe.xlsx"
+    dspe_path = "data/raw/stats_dspe.xlsx"
     if os.path.isfile(dspe_path):
         data["df_dspe"] = parse_dspe_file(dspe_path)
     else:
