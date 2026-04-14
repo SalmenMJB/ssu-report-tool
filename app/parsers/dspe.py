@@ -16,6 +16,17 @@ def parse_dspe_file(filepath):
     df = df.reset_index(drop=True)
 
     rename_map = {
+        # Colonnes de stats_dspe.xlsx
+        "mois des séances": "mois",
+        "mois des seances": "mois",
+        "prénoms": "prenom",
+        "prenoms": "prenom",
+        "prénom": "prenom",
+        "nom": "nom",
+        "email": "email",
+        "nombre de séances": "nombre_seances",
+        "nombre de seances": "nombre_seances",
+        # Anciennes colonnes (compatibilité)
         "1res séances": "premieres_seances",
         "1ères séances": "premieres_seances",
         "1ères seances": "premieres_seances",
@@ -39,7 +50,7 @@ def parse_dspe_file(filepath):
     existing_rename = {k: v for k, v in rename_map.items() if k in df.columns}
     df = df.rename(columns=existing_rename)
 
-    numeric_cols = ["premieres_seances", "seances_suivi", "total_seances"]
+    numeric_cols = ["premieres_seances", "seances_suivi", "total_seances", "nombre_seances"]
     for col in numeric_cols:
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
