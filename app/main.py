@@ -129,7 +129,7 @@ def main():
     print_indicators(consommables_stats)
 
     print_section("BILAN ACTIONS")
-    bilan_actions_path = "data/raw/bilan_actions.xlsx"
+    bilan_actions_path = "data/raw/bilan_actions_25_26.xlsx"
     import os
     if os.path.isfile(bilan_actions_path):
         df_bilan_actions = parse_bilan_actions_file(bilan_actions_path)
@@ -142,7 +142,7 @@ def main():
         print(f"Fichier non trouvé : {bilan_actions_path}")
 
     print_section("DSPE")
-    dspe_path = "data/raw/seances_dspe.xlsx"
+    dspe_path = "data/raw/stats_dspe.xlsx"
     if os.path.isfile(dspe_path):
         df_dspe = parse_dspe_file(dspe_path)
         print(df_dspe.head())
