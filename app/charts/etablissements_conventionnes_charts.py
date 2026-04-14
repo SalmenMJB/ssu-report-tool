@@ -16,16 +16,17 @@ def plot_etablissements_conventionnes():
         calcul = (val/somme)*100
         pourcentages.append(round(calcul,2))
 
-    couleurs = {"#006400", # vert foncé,
-                "#008000", # vert
-                "#6B8E23", # vert jaunâtre
-                "#9ACD32", # jaune-vert
-                "#003b9b", # jaune
-                "#FFA500", # orange
-                "#FF8C00", # orange foncé
-                "#CD853F", # brun foncé
-                "#8B4513" # marron
-                }
+    couleurs = [
+        "#006400",  # vert foncé
+        "#008000",  # vert
+        "#6B8E23",  # vert jaunâtre
+        "#9ACD32",  # jaune-vert
+        "#003b9b",  # bleu foncé
+        "#FFA500",  # orange
+        "#FF8C00",  # orange foncé
+        "#CD853F",  # brun foncé
+        "#8B4513",  # marron
+    ]
 
     fig, ax = plt.subplots(figsize=(12, 8))
 

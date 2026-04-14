@@ -68,7 +68,7 @@ def plot_bilan_actions_par_campus(bilan_indicators: dict) -> None:
     plt.close()
 
 
-def plot_bilan_consommables(bilan_indicators: dict) -> None:
+def plot_consommables_bilan_actions(bilan_indicators: dict) -> None:
     """
     Graphique des consommables distribués lors des actions de bilan.
     Utilise les clés préfixées par 'total_' dans les indicateurs.
@@ -105,5 +105,48 @@ def plot_bilan_consommables(bilan_indicators: dict) -> None:
     ax.set_ylabel("Quantité")
     plt.xticks(rotation=45, ha="right")
     plt.tight_layout()
-    plt.savefig("output/charts/bilan_consommables.png")
+    plt.savefig("output/charts/consommables_bilan_actions.png")
+    plt.close()
+
+
+def plot_actions_par_site_lisible(bilan_indicators: dict) -> None:
+    """
+    Graphique en barres horizontales des actions par site/établissement
+    à partir des indicateurs du bilan d'actions.
+    """
+    data = bilan_indicators.get("actions_par_etablissement")
+    if data is None:
+        data = bilan_indicators.get("actions_par_site")
+    if data is None or len(data) == 0:
+        return
+
+    if hasattr(data, "index"):
+        data = data[data.index.notna()]
+        s = data.sort_values(ascending=True)
+    else:
+        import pandas as pd
+        s = pd.Series(data).sort_values(ascending=True)
+
+    os.makedirs("output/charts", exist_ok=True)
+
+    fig, ax = plt.subplots(figsize=(10, max(5, len(s) * 0.5)))
+    bars = ax.barh(s.index.astype(str), s.values, color="#3498DB")
+
+    offset = max(s.values) * 0.01 if len(s.values) > 0 else 1
+
+    for bar in bars:
+        width = bar.get_width()
+        ax.text(
+            width + offset,
+            bar.get_y() + bar.get_height() / 2,
+            str(int(width)),
+            va="center",
+            fontsize=9,
+        )
+
+    ax.set_title("Répartition des lieux et nombre d'actions par site")
+    ax.set_xlabel("Nombre d'actions")
+    ax.set_ylabel("Site")
+    plt.tight_layout()
+    plt.savefig("output/charts/actions_par_site_lisible.png")
     plt.close()

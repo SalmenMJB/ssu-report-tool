@@ -17,17 +17,16 @@ warnings.filterwarnings(
 
 from app.parsers.effectifs import parse_effectifs_file
 from app.parsers.stats_standard import parse_stats_standard_file
-from app.parsers.consommables import parse_consommables_file
 from app.parsers.stat_activite import parse_stat_activite_file
 from app.parsers.pssm import parse_pssm_file
-from app.parsers.psy import parse_psy_file
 from app.parsers.bilan_actions import parse_bilan_actions_file
 from app.parsers.dspe import parse_dspe_file
+
+from app.config.intervenants import MEDECINS, INFIRMIERES
 
 from app.services.indicator_service import (
     compute_effectifs_indicators,
     compute_stats_standard_indicators,
-    compute_consommables_indicators,
     compute_stat_activite_indicators,
     compute_pssm_indicators,
     compute_bilan_actions_indicators,
@@ -73,7 +72,7 @@ def _load_data():
         data["activite_stats"] = compute_stat_activite_indicators(data["df_activite"])
         data["css_stats"] = compute_css_indicators(data["df_activite"])
         data["bilans_professionnels_stats"] = compute_bilans_professionnels_indicators(
-            data["df_activite"]
+            data["df_activite"], MEDECINS, INFIRMIERES
         )
     else:
         data["df_activite"] = None
@@ -97,15 +96,10 @@ def _load_data():
         data["df_stats"] = None
         data["stats_stats"] = {}
 
-    consommables_path = "data/raw/extraction_consommables_actions_24_25.xlsx"
-    if os.path.isfile(consommables_path):
-        data["df_consommables"] = parse_consommables_file(consommables_path)
-        data["consommables_stats"] = compute_consommables_indicators(data["df_consommables"])
-    else:
-        data["df_consommables"] = None
-        data["consommables_stats"] = {}
+    data["df_consommables"] = None
+    data["consommables_stats"] = {}
 
-    bilan_actions_path = "data/raw/bilan_actions_25_26.xlsx"
+    bilan_actions_path = "data/raw/bilan_actions.xlsx"
     if os.path.isfile(bilan_actions_path):
         data["df_bilan_actions"] = parse_bilan_actions_file(bilan_actions_path)
         data["bilan_actions_stats"] = compute_bilan_actions_indicators(
@@ -115,7 +109,7 @@ def _load_data():
         data["df_bilan_actions"] = None
         data["bilan_actions_stats"] = {}
 
-    dspe_path = "data/raw/stats_dspe.xlsx"
+    dspe_path = "data/raw/seances_dspe.xlsx"
     if os.path.isfile(dspe_path):
         data["df_dspe"] = parse_dspe_file(dspe_path)
     else:
@@ -127,12 +121,6 @@ def _load_data():
         data["pssm_stats"] = compute_pssm_indicators(pssm_sheets)
     else:
         data["pssm_stats"] = {}
-
-    psy_path = "data/raw/stats_psy.xlsx"
-    if os.path.isfile(psy_path):
-        data["df_psy"] = parse_psy_file(psy_path)
-    else:
-        data["df_psy"] = None
 
     return data
 

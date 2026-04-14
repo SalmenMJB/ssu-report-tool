@@ -1,17 +1,17 @@
+import os
 import pandas as pd
 
 from app.parsers.effectifs import parse_effectifs_file
 from app.parsers.stats_standard import parse_stats_standard_file
-from app.parsers.consommables import parse_consommables_file
 from app.parsers.stat_activite import parse_stat_activite_file
 from app.parsers.pssm import parse_pssm_file
-from app.parsers.psy import parse_psy_file
 from app.parsers.bilan_actions import parse_bilan_actions_file
 from app.parsers.dspe import parse_dspe_file
 
+from app.config.intervenants import MEDECINS, INFIRMIERES
+
 from app.services.indicator_service import compute_effectifs_indicators
 from app.services.indicator_service import compute_stats_standard_indicators
-from app.services.indicator_service import compute_consommables_indicators
 from app.services.indicator_service import compute_stat_activite_indicators
 from app.services.indicator_service import compute_pssm_indicators
 from app.services.indicator_service import compute_bilan_actions_indicators
@@ -22,15 +22,12 @@ from app.services.indicator_service import compute_bilans_professionnels_indicat
 from app.charts.stats_standard_charts import plot_appels_par_mois
 from app.charts.effectifs_charts import plot_evolution_effectifs
 from app.charts.etablissements_charts import plot_top_etablissements
-from app.charts.consommables_charts import plot_consommables
-from app.charts.pssm_charts import plot_pssm_sessions
-from app.charts.consommables_charts import plot_actions_par_campus
+from app.charts.pssm_charts import plot_pssm_sessions, plot_pssm_lastest_year
 from app.charts.etablissements_conventionnes_charts import plot_etablissements_conventionnes
 from app.charts.repartition_amenagements_charts import plot_reparition_amenagements
 from app.charts.consultations_charts import plot_recap_consultations
 from app.charts.motifs_medecine_generale_charts import plot_motifs_medecine_generale_charts
 from app.charts.activite_charts import (
-    plot_visites_vaccinations,
     plot_top_nationalites,
     plot_handicap,
 )
@@ -51,24 +48,18 @@ from app.charts.bilans_charts import (
 )
 from app.charts.motifs_medecine_generale_bis import plot_motifs_medecine_generale_bis
 from app.charts.infirmier_charts import plot_repartition_activite_infirmiere
-from app.charts.psy_charts import plot_delai_attente_psy
-from app.charts.psy_charts import plot_problematique_psy
 from app.charts.infirmier_charts import plot_activite_infirmiere_compare
 from app.charts.psy_charts import plot_duree_suivi
-from app.charts.prevention_charts import plot_actions_par_site_lisible
 from app.charts.infirmier_charts import plot_repartition_activite_depuis_reel
 from app.charts.css_charts import plot_motifs_reels_css
 from app.charts.bilan_actions_charts import (
     plot_actions_par_theme,
-    plot_bilan_actions_par_campus,
-    plot_bilan_consommables,
+    plot_consommables_bilan_actions,
+    plot_actions_par_site_lisible,
 )
 from app.charts.bilans_professionnels_charts import (
-    plot_bilans_par_profession,
     plot_bilans_medecins_vs_infirmieres,
 )
-# from app.charts.psy_charts import plot_duree_suivi_psy
-# from app.charts.pssm_charts import plot_origine_stagiaires_pssm
 
 import warnings
 warnings.filterwarnings(
@@ -101,7 +92,9 @@ def main():
     print_section("CSS")
     print_indicators(css_stats)
 
-    bilans_professionnels_stats = compute_bilans_professionnels_indicators(df_activite)
+    bilans_professionnels_stats = compute_bilans_professionnels_indicators(
+        df_activite, MEDECINS, INFIRMIERES
+    )
     print_section("Bilans professionnels")
     print_indicators(bilans_professionnels_stats)
 
@@ -120,17 +113,8 @@ def main():
     stats_stats = compute_stats_standard_indicators(df_stats)
     print_indicators(stats_stats)
 
-    print_section("CONSOMMABLES")
-    consommables_path = "data/raw/extraction_consommables_actions_24_25.xlsx"
-    df_consommables = parse_consommables_file(consommables_path)
-    print(df_consommables.head())
-    print()
-    consommables_stats = compute_consommables_indicators(df_consommables)
-    print_indicators(consommables_stats)
-
     print_section("BILAN ACTIONS")
-    bilan_actions_path = "data/raw/bilan_actions_25_26.xlsx"
-    import os
+    bilan_actions_path = "data/raw/bilan_actions.xlsx"
     if os.path.isfile(bilan_actions_path):
         df_bilan_actions = parse_bilan_actions_file(bilan_actions_path)
         print(df_bilan_actions.head())
@@ -142,7 +126,7 @@ def main():
         print(f"Fichier non trouvé : {bilan_actions_path}")
 
     print_section("DSPE")
-    dspe_path = "data/raw/stats_dspe.xlsx"
+    dspe_path = "data/raw/seances_dspe.xlsx"
     if os.path.isfile(dspe_path):
         df_dspe = parse_dspe_file(dspe_path)
         print(df_dspe.head())
@@ -158,23 +142,11 @@ def main():
     print()
     pssm_stats = compute_pssm_indicators(pssm_sheets)
     print_indicators(pssm_stats)
-    
-    print_section("STATS Motifs Psy")
-    psy_path = "data/raw/stats_psy.xlsx"
-    df_psy = parse_psy_file(psy_path)
-    print(df_psy.head())
-    print(df_psy.columns.tolist())
-    plot_problematique_psy(df_psy)
-    print("Graphique généré : output/charts/problematique_psy.png")
-
 
 
     #### GRAPHIQUES ####
     plot_recap_consultations(activite_stats)
     print("Graphique généré : output/charts/recap_consultations.png")
-
-    plot_visites_vaccinations(activite_stats)
-    print("Graphiques générés : output/charts/visites.png + output/charts/vaccinations.png")
 
     plot_top_nationalites(activite_stats)
     print("Graphique généré : output/charts/top_nationalites.png")
@@ -200,14 +172,11 @@ def main():
     plot_top_etablissements(df_effectifs)
     print("Graphique généré : output/charts/top_etablissements.png")
 
-    plot_consommables(consommables_stats)
-    print("Graphique généré : output/charts/consommables.png")
-
     plot_pssm_sessions(pssm_stats)
     print("Graphique généré : output/charts/pssm_sessions.png")
 
-    plot_actions_par_campus(consommables_stats)
-    print("Graphique généré : output/charts/actions_par_campus.png")
+    plot_pssm_lastest_year(pssm_stats)
+    print("Graphique généré : output/charts/pssm_latest_year.png")
 
     plot_etablissements_conventionnes()
     print("Graphique généré : output/charts/etablissements_conventionnes.png")
@@ -215,17 +184,14 @@ def main():
     plot_reparition_amenagements()
     print("Graphique généré : output/charts/repartition_amenagements.png")
 
-
     plot_evolution_amenagements()
     print("Graphique généré : output/charts/evolution_amenagements.png")
-
 
     historique_medical_path = "data/processed/historique_activite_medicale.csv"
     plot_evolution_activite_medicale(historique_medical_path)
     print("Graphique généré : output/charts/evolution_activite_medicale.png")
     plot_repartition_activite_medicale_annee(historique_medical_path)
     print("Graphique généré : output/charts/repartition_activite_medicale.png")
-
 
     df_bilans = df_activite[df_activite["motif"] == "Bilan de prévention"]
     plot_bilans_par_composante(df_bilans)
@@ -240,15 +206,10 @@ def main():
     plot_motifs_medecine_generale_bis(activite_stats)
     print("Graphique généré : output/charts/motifs_medecine_bis.png")
 
-
     repartition_infirmiere_path = "data/processed/repartition_activite_infirmiere.csv"
     plot_repartition_activite_infirmiere(repartition_infirmiere_path)
     print("Graphique généré : output/charts/repartition_activite_infirmiere.png")
 
-    delai_psy_path = "data/processed/delai_attente_psy.csv"
-    plot_delai_attente_psy(delai_psy_path)
-    print("Graphique généré : output/charts/delai_attente_psy.png")
-    
     compare_path = "data/processed/activite_infirmiere_compare.csv"
     plot_activite_infirmiere_compare(compare_path)
     print("Graphique généré : output/charts/activite_infirmiere_compare.png")
@@ -256,50 +217,25 @@ def main():
     plot_repartition_activite_depuis_reel(df_activite)
     print("Graphique généré : output/charts/repartition_activite_reelle.png")
 
-
-    
-    sites = {
-        "UA": 95,
-        "Institut agro Rennes Angers": 11,
-        "UCO": 11,
-        "ESA": 8,
-        "TALM": 7,
-        "ENSAM": 7,
-        "ETSCO": 2,
-        "ISTOM": 2,
-        "ARIFTS": 1,
-        "IFORIS": 1,
-    }
-
-    plot_actions_par_site_lisible(sites)
-    print("Graphique généré : output/charts/actions_par_site_lisible.png")
-
-    
     plot_duree_suivi(df_activite)
     print("Graphique généré : output/charts/duree_suivi.png")
 
-    # Nouveaux graphiques CSS
+    # Graphiques CSS
     plot_motifs_reels_css(css_stats)
     print("Graphique généré : output/charts/motifs_reels_css.png")
 
-    # Nouveaux graphiques bilan actions
+    # Graphiques bilan actions
     if bilan_actions_stats:
         plot_actions_par_theme(bilan_actions_stats)
         print("Graphique généré : output/charts/bilan_actions_par_theme.png")
-        plot_bilan_actions_par_campus(bilan_actions_stats)
-        print("Graphique généré : output/charts/bilan_actions_par_campus.png")
-        plot_bilan_consommables(bilan_actions_stats)
-        print("Graphique généré : output/charts/bilan_consommables.png")
+        plot_consommables_bilan_actions(bilan_actions_stats)
+        print("Graphique généré : output/charts/consommables_bilan_actions.png")
+        plot_actions_par_site_lisible(bilan_actions_stats)
+        print("Graphique généré : output/charts/actions_par_site_lisible.png")
 
-    # Nouveaux graphiques bilans professionnels
-    plot_bilans_par_profession(bilans_professionnels_stats)
-    print("Graphique généré : output/charts/bilans_par_profession.png")
+    # Graphiques bilans professionnels
     plot_bilans_medecins_vs_infirmieres(bilans_professionnels_stats)
     print("Graphique généré : output/charts/bilans_medecins_vs_infirmieres.png")
-
-    
-    # plot_origine_stagiaires_pssm(df_pssm)
-    # print("Graphique généré : output/charts/origine_pssm.png")
 
     #### RAPPORT WORD ####
     print_section("Génération du rapport Word")
