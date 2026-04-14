@@ -6,12 +6,17 @@ from app.parsers.consommables import parse_consommables_file
 from app.parsers.stat_activite import parse_stat_activite_file
 from app.parsers.pssm import parse_pssm_file
 from app.parsers.psy import parse_psy_file
+from app.parsers.bilan_actions import parse_bilan_actions_file
+from app.parsers.dspe import parse_dspe_file
 
 from app.services.indicator_service import compute_effectifs_indicators
 from app.services.indicator_service import compute_stats_standard_indicators
 from app.services.indicator_service import compute_consommables_indicators
 from app.services.indicator_service import compute_stat_activite_indicators
 from app.services.indicator_service import compute_pssm_indicators
+from app.services.indicator_service import compute_bilan_actions_indicators
+from app.services.indicator_service import compute_css_indicators
+from app.services.indicator_service import compute_bilans_professionnels_indicators
 
 
 from app.charts.stats_standard_charts import plot_appels_par_mois
@@ -52,6 +57,16 @@ from app.charts.infirmier_charts import plot_activite_infirmiere_compare
 from app.charts.psy_charts import plot_duree_suivi
 from app.charts.prevention_charts import plot_actions_par_site_lisible
 from app.charts.infirmier_charts import plot_repartition_activite_depuis_reel
+from app.charts.css_charts import plot_motifs_reels_css
+from app.charts.bilan_actions_charts import (
+    plot_actions_par_theme,
+    plot_bilan_actions_par_campus,
+    plot_bilan_consommables,
+)
+from app.charts.bilans_professionnels_charts import (
+    plot_bilans_par_profession,
+    plot_bilans_medecins_vs_infirmieres,
+)
 # from app.charts.psy_charts import plot_duree_suivi_psy
 # from app.charts.pssm_charts import plot_origine_stagiaires_pssm
 
@@ -82,6 +97,14 @@ def main():
     activite_stats = compute_stat_activite_indicators(df_activite)
     print_indicators(activite_stats)
 
+    css_stats = compute_css_indicators(df_activite)
+    print_section("CSS")
+    print_indicators(css_stats)
+
+    bilans_professionnels_stats = compute_bilans_professionnels_indicators(df_activite)
+    print_section("Bilans professionnels")
+    print_indicators(bilans_professionnels_stats)
+
     
     print_section("Effectifs")
     effectifs_path = "data/raw/evolution_etab_conventionnes.xlsx" 
@@ -104,6 +127,28 @@ def main():
     print()
     consommables_stats = compute_consommables_indicators(df_consommables)
     print_indicators(consommables_stats)
+
+    print_section("BILAN ACTIONS")
+    bilan_actions_path = "data/raw/bilan_actions.xlsx"
+    import os
+    if os.path.isfile(bilan_actions_path):
+        df_bilan_actions = parse_bilan_actions_file(bilan_actions_path)
+        print(df_bilan_actions.head())
+        bilan_actions_stats = compute_bilan_actions_indicators(df_bilan_actions)
+        print_indicators(bilan_actions_stats)
+    else:
+        df_bilan_actions = None
+        bilan_actions_stats = {}
+        print(f"Fichier non trouvé : {bilan_actions_path}")
+
+    print_section("DSPE")
+    dspe_path = "data/raw/seances_dspe.xlsx"
+    if os.path.isfile(dspe_path):
+        df_dspe = parse_dspe_file(dspe_path)
+        print(df_dspe.head())
+    else:
+        df_dspe = None
+        print(f"Fichier non trouvé : {dspe_path}")
 
     print_section("PSSM")
     pssm_path = "data/raw/recap_pssm.xlsx"
@@ -233,6 +278,24 @@ def main():
     plot_duree_suivi(df_activite)
     print("Graphique généré : output/charts/duree_suivi.png")
 
+    # Nouveaux graphiques CSS
+    plot_motifs_reels_css(css_stats)
+    print("Graphique généré : output/charts/motifs_reels_css.png")
+
+    # Nouveaux graphiques bilan actions
+    if bilan_actions_stats:
+        plot_actions_par_theme(bilan_actions_stats)
+        print("Graphique généré : output/charts/bilan_actions_par_theme.png")
+        plot_bilan_actions_par_campus(bilan_actions_stats)
+        print("Graphique généré : output/charts/bilan_actions_par_campus.png")
+        plot_bilan_consommables(bilan_actions_stats)
+        print("Graphique généré : output/charts/bilan_consommables.png")
+
+    # Nouveaux graphiques bilans professionnels
+    plot_bilans_par_profession(bilans_professionnels_stats)
+    print("Graphique généré : output/charts/bilans_par_profession.png")
+    plot_bilans_medecins_vs_infirmieres(bilans_professionnels_stats)
+    print("Graphique généré : output/charts/bilans_medecins_vs_infirmieres.png")
 
     
     # plot_origine_stagiaires_pssm(df_pssm)

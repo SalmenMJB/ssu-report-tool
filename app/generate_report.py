@@ -4,7 +4,7 @@ Script d'intégration principal : génère le rapport Word SSU complet.
 Usage :
     python -m app.generate_report
 
-Le fichier Word est sauvegardé dans output/rapport_ssu_2024_2025.docx
+Le fichier Word est sauvegardé dans output/rapport_ssu_{year1}_{year2}.docx
 """
 
 import os
@@ -21,6 +21,8 @@ from app.parsers.consommables import parse_consommables_file
 from app.parsers.stat_activite import parse_stat_activite_file
 from app.parsers.pssm import parse_pssm_file
 from app.parsers.psy import parse_psy_file
+from app.parsers.bilan_actions import parse_bilan_actions_file
+from app.parsers.dspe import parse_dspe_file
 
 from app.services.indicator_service import (
     compute_effectifs_indicators,
@@ -28,7 +30,12 @@ from app.services.indicator_service import (
     compute_consommables_indicators,
     compute_stat_activite_indicators,
     compute_pssm_indicators,
+    compute_bilan_actions_indicators,
+    compute_css_indicators,
+    compute_bilans_professionnels_indicators,
 )
+
+from app.utils.academic_year import get_academic_year, get_academic_year_label
 
 from app.report_generator.document_builder import ReportBuilder
 from app.report_generator.chapters.intro import build_intro_chapter
@@ -47,8 +54,13 @@ from app.report_generator.chapters.partenariats import (
     build_partenariats_chapter,
 )
 
-OUTPUT_DOCX = "output/rapport_ssu_2024_2025.docx"
 LOGO_PATH = "app/templates/assets/logo_ua.png"
+
+
+def _get_output_path() -> str:
+    """Retourne le chemin du fichier de sortie avec l'année académique courante."""
+    year1, year2 = get_academic_year()
+    return f"output/rapport_ssu_{year1}_{year2}.docx"
 
 
 def _load_data():
@@ -59,9 +71,15 @@ def _load_data():
     if os.path.isfile(activite_path):
         data["df_activite"] = parse_stat_activite_file(activite_path)
         data["activite_stats"] = compute_stat_activite_indicators(data["df_activite"])
+        data["css_stats"] = compute_css_indicators(data["df_activite"])
+        data["bilans_professionnels_stats"] = compute_bilans_professionnels_indicators(
+            data["df_activite"]
+        )
     else:
         data["df_activite"] = None
         data["activite_stats"] = {}
+        data["css_stats"] = {}
+        data["bilans_professionnels_stats"] = {}
 
     effectifs_path = "data/raw/evolution_etab_conventionnes.xlsx"
     if os.path.isfile(effectifs_path):
@@ -87,6 +105,22 @@ def _load_data():
         data["df_consommables"] = None
         data["consommables_stats"] = {}
 
+    bilan_actions_path = "data/raw/bilan_actions.xlsx"
+    if os.path.isfile(bilan_actions_path):
+        data["df_bilan_actions"] = parse_bilan_actions_file(bilan_actions_path)
+        data["bilan_actions_stats"] = compute_bilan_actions_indicators(
+            data["df_bilan_actions"]
+        )
+    else:
+        data["df_bilan_actions"] = None
+        data["bilan_actions_stats"] = {}
+
+    dspe_path = "data/raw/seances_dspe.xlsx"
+    if os.path.isfile(dspe_path):
+        data["df_dspe"] = parse_dspe_file(dspe_path)
+    else:
+        data["df_dspe"] = None
+
     pssm_path = "data/raw/recap_pssm.xlsx"
     if os.path.isfile(pssm_path):
         pssm_sheets = parse_pssm_file(pssm_path)
@@ -106,8 +140,12 @@ def _load_data():
 def main():
     """Point d'entrée principal de la génération du rapport."""
 
+    year1, year2 = get_academic_year()
+    academic_label = get_academic_year_label(" – ")
+    output_docx = _get_output_path()
+
     print("=" * 60)
-    print("  Génération du rapport SSU 2024-2025")
+    print(f"  Génération du rapport SSU {year1}-{year2}")
     print("=" * 60)
 
     # 1. Chargement des données
@@ -118,12 +156,12 @@ def main():
     print("[2/3] Construction du rapport Word...")
     os.makedirs("output", exist_ok=True)
 
-    builder = ReportBuilder(OUTPUT_DOCX)
+    builder = ReportBuilder(output_docx)
 
     # Page de titre
     builder.add_title_page(
         title="Rapport d'activité",
-        subtitle="2024 – 2025",
+        subtitle=academic_label,
         logo_path=LOGO_PATH,
     )
 
@@ -144,13 +182,22 @@ def main():
     )
 
     # 3. Médecine générale
-    build_medecine_chapter(builder, data["df_activite"], data["activite_stats"])
+    build_medecine_chapter(
+        builder,
+        data["df_activite"],
+        data["activite_stats"],
+        data["bilans_professionnels_stats"],
+    )
 
     # 4. Service infirmier
     build_ide_chapter(builder, data["activite_stats"])
 
     # 5. Éducation à la santé
-    build_consommables_chapter(builder, data["consommables_stats"])
+    build_consommables_chapter(
+        builder,
+        data["consommables_stats"],
+        data["bilan_actions_stats"],
+    )
 
     # 6. Psychologie
     build_psy_chapter(builder, data["activite_stats"])
@@ -162,7 +209,7 @@ def main():
     build_sante_mentale_chapter(builder, data["pssm_stats"])
 
     # 9. Centre de santé sexuelle
-    build_css_chapter(builder, data["activite_stats"])
+    build_css_chapter(builder, data["activite_stats"], data["css_stats"])
 
     # 10. Diététique et Nutrition
     build_dietetique_chapter(builder)
@@ -174,7 +221,7 @@ def main():
     print("[3/3] Sauvegarde...")
     builder.save()
     print("\n✅ Rapport généré avec succès !")
-    print(f"   Fichier : {OUTPUT_DOCX}")
+    print(f"   Fichier : {output_docx}")
     print(
         "\n   ℹ️  Ouvrez le fichier dans Word ou LibreOffice et appuyez sur\n"
         "      F9 (Windows) / Cmd+A+F9 (Mac) pour mettre à jour le sommaire."

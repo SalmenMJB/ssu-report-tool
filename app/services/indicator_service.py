@@ -1,5 +1,8 @@
 import pandas as pd
 
+from app.utils.cleaning import standardize_simple_labels, standardize_etablissement
+from app.config.intervenants import get_profession
+
 
 """
 def compute_dspe_indicators(df):
@@ -58,25 +61,52 @@ def compute_stat_activite_indicators(df):
         indicators["age_moyen"] = df["âge"].dropna().mean()
 
     if "centre" in df.columns:
+        df = df.copy()
+        df["centre"] = standardize_simple_labels(df["centre"])
         indicators["consultations_par_centre"] = df["centre"].value_counts(dropna=False)
 
     if "motif" in df.columns:
+        df = df.copy() if "centre" not in df.columns else df
+        df["motif"] = standardize_simple_labels(df["motif"])
         motif_counts = df["motif"].value_counts(dropna=False)
 
         indicators["top_motifs"] = motif_counts.head(10)
 
-        indicators["consultations_medecine_generale"] = motif_counts.get("Consultations médecine générale", 0)
-        indicators["consultations_psychologie"] = motif_counts.get("Psychologie", 0)
-        indicators["consultations_psychiatrie"] = motif_counts.get("Psychiatrie", 0)
-        indicators["consultations_ide"] = motif_counts.get("Consultations IDE", 0)
-        indicators["consultations_css"] = motif_counts.get("Centre de planification", 0)
-        indicators["consultations_bilans"] = motif_counts.get("Bilan de prévention", 0)
+        # Recherche tolérante à la casse pour les principaux motifs
+        def _get_motif(counts, *candidates):
+            for c in candidates:
+                val = counts.get(c, None)
+                if val is not None:
+                    return val
+                # essai insensible à la casse
+                for idx in counts.index:
+                    if str(idx).lower() == c.lower():
+                        return counts[idx]
+            return 0
+
+        indicators["consultations_medecine_generale"] = _get_motif(
+            motif_counts,
+            "Consultations médecine générale",
+            "Consultations medecine generale",
+        )
+        indicators["consultations_psychologie"] = _get_motif(motif_counts, "Psychologie")
+        indicators["consultations_psychiatrie"] = _get_motif(motif_counts, "Psychiatrie")
+        indicators["consultations_ide"] = _get_motif(
+            motif_counts, "Consultations IDE", "Consultations ide"
+        )
+        indicators["consultations_css"] = _get_motif(
+            motif_counts, "Centre de planification"
+        )
+        indicators["consultations_bilans"] = _get_motif(
+            motif_counts, "Bilan de prévention", "Bilan de prevention"
+        )
 
     if "motif réels" in df.columns:
         indicators["top_motifs_reels"] = df["motif réels"].value_counts(dropna=False).head(10)
 
     if "établissement" in df.columns:
-        indicators["consultations_par_etablissement"] = df["établissement"].value_counts(dropna=False).head(10)
+        etab_series = df["établissement"].map(standardize_etablissement)
+        indicators["consultations_par_etablissement"] = etab_series.value_counts(dropna=False).head(10)
 
     if "sexe" in df.columns:
         indicators["repartition_sexe"] = df["sexe"].value_counts(dropna=False)
@@ -231,9 +261,15 @@ def compute_pssm_indicators(pssm_sheets):
 
     all_pssm = pd.concat(all_frames, ignore_index=True)
 
-    # garder les lignes avec une vraie date/session
-    if "dates" in all_pssm.columns:
-        all_pssm = all_pssm[all_pssm["dates"].notna()]
+    # Gérer les colonnes de dates alternatives : "dates", "date début", "date de début"
+    date_col = None
+    for candidate in ("dates", "date début", "date de début", "date debut", "date"):
+        if candidate in all_pssm.columns:
+            date_col = candidate
+            break
+
+    if date_col:
+        all_pssm = all_pssm[all_pssm[date_col].notna()]
 
     indicators["nombre_sessions"] = len(all_pssm)
 
@@ -253,7 +289,102 @@ def compute_pssm_indicators(pssm_sheets):
         return indicators
 
 
+def compute_bilan_actions_indicators(df):
+    """
+    Analyse des actions d'éducation sanitaire :
+    thèmes, établissements, sites UA et consommables.
+    """
+    indicators = {}
+
+    indicators["nombre_actions"] = len(df)
+
+    if "theme" in df.columns:
+        df = df.copy()
+        df["theme"] = standardize_simple_labels(df["theme"])
+        indicators["actions_par_theme"] = df["theme"].value_counts(dropna=False)
+
+    if "etablissement" in df.columns:
+        etab_series = df["etablissement"].map(standardize_etablissement)
+        indicators["actions_par_etablissement"] = etab_series.value_counts(dropna=False)
+
+    if "site" in df.columns:
+        df = df.copy() if "theme" not in df.columns else df
+        df["site"] = standardize_simple_labels(df["site"])
+        indicators["actions_par_site"] = df["site"].value_counts(dropna=False)
+
+    if "campus" in df.columns:
+        indicators["actions_par_campus"] = df["campus"].value_counts(dropna=False)
+
+    if "nb_participants" in df.columns:
+        indicators["total_participants"] = df["nb_participants"].fillna(0).sum()
+
+    return indicators
 
 
+def compute_css_indicators(df):
+    """
+    Analyse du Centre de Santé Sexuelle :
+    filtre les lignes avec motif == "Centre de planification".
+    """
+    indicators = {}
+
+    if "motif" not in df.columns:
+        return indicators
+
+    df_css = df[
+        df["motif"].str.lower().str.contains("planification", na=False)
+    ].copy()
+
+    indicators["total_consultations_css"] = len(df_css)
+
+    if "motif réels" in df_css.columns:
+        motifs_reels = df_css["motif réels"].value_counts(dropna=False)
+        indicators["motifs_reels_css"] = motifs_reels
+
+    if "établissement" in df_css.columns:
+        etab_series = df_css["établissement"].map(standardize_etablissement)
+        indicators["css_par_etablissement"] = etab_series.value_counts(dropna=False)
+
+    if "sexe" in df_css.columns:
+        indicators["css_repartition_sexe"] = df_css["sexe"].value_counts(dropna=False)
+
+    return indicators
+
+
+def compute_bilans_professionnels_indicators(df):
+    """
+    Analyse des bilans de prévention par profession
+    (médecins vs infirmières).
+    """
+    indicators = {}
+
+    if "motif" not in df.columns:
+        return indicators
+
+    df_bilans = df[
+        df["motif"].str.lower().str.contains("bilan", na=False)
+    ].copy()
+
+    indicators["total_bilans"] = len(df_bilans)
+
+    # Déterminer la colonne intervenant
+    intervenant_col = None
+    for candidate in ("intervenant", "praticien", "médecin", "professionnel"):
+        if candidate in df_bilans.columns:
+            intervenant_col = candidate
+            break
+
+    if intervenant_col:
+        df_bilans["profession"] = df_bilans[intervenant_col].map(get_profession)
+        indicators["bilans_par_profession"] = df_bilans["profession"].value_counts(dropna=False)
+
+    if "établissement" in df_bilans.columns:
+        etab_series = df_bilans["établissement"].map(standardize_etablissement)
+        indicators["bilans_par_etablissement"] = etab_series.value_counts(dropna=False)
+
+    if "composante" in df_bilans.columns:
+        indicators["bilans_par_composante"] = df_bilans["composante"].value_counts(dropna=False).head(10)
+
+    return indicators
 
 

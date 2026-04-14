@@ -23,12 +23,21 @@ ACTIONS_TEXT = (
     "des établissements partenaires."
 )
 
+BILAN_ACTIONS_TEXT = (
+    "Le bilan des actions d'éducation sanitaire détaille les thèmes abordés "
+    "et les établissements impliqués tout au long de l'année."
+)
+
 
 def build_consommables_chapter(
     builder: ReportBuilder,
     consommables_stats: dict,
+    bilan_actions_stats: dict = None,
 ) -> None:
     """Construit le chapitre Éducation à la santé / Consommables."""
+
+    if bilan_actions_stats is None:
+        bilan_actions_stats = {}
 
     builder.add_chapter("Éducation à la santé", INTRO_TEXT)
 
@@ -50,11 +59,28 @@ def build_consommables_chapter(
         caption="Actions de prévention par site",
     )
 
+    # --- Bilan des actions (nouveaux graphiques) ---
+    builder.add_section("Bilan des actions d'éducation sanitaire", BILAN_ACTIONS_TEXT)
+    builder.add_image(
+        "output/charts/bilan_actions_par_theme.png",
+        caption="Actions par thème",
+    )
+    builder.add_image(
+        "output/charts/bilan_actions_par_campus.png",
+        caption="Actions par campus (bilan)",
+    )
+
     # Chiffres clés avec flèches bleues
     if "nombres_actions" in consommables_stats:
         builder.add_blue_arrow_paragraph(
             f"Nombre d'actions de prévention : "
             f"{int(consommables_stats['nombres_actions'])}"
+        )
+
+    if "nombre_actions" in bilan_actions_stats:
+        builder.add_blue_arrow_paragraph(
+            f"Actions d'éducation sanitaire (bilan) : "
+            f"{int(bilan_actions_stats['nombre_actions'])}"
         )
 
     total_preservatifs = sum(
