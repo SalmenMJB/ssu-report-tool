@@ -370,12 +370,22 @@ def compute_css_indicators(df):
     return indicators
 
 
-def compute_bilans_professionnels_indicators(df):
+def compute_bilans_professionnels_indicators(df, medecins=None, infirmieres=None):
     """
     Analyse des bilans de prévention par profession
-    (médecins vs infirmières).
+    (médecins vs infirmières vs autres).
+
+    Paramètres :
+    - df : DataFrame des activités
+    - medecins : liste des noms de médecins (optionnel)
+    - infirmieres : liste des noms d'infirmières (optionnel)
     """
     indicators = {}
+
+    if medecins is None:
+        medecins = []
+    if infirmieres is None:
+        infirmieres = []
 
     if "motif" not in df.columns:
         return indicators
@@ -394,8 +404,33 @@ def compute_bilans_professionnels_indicators(df):
             break
 
     if intervenant_col:
-        df_bilans["profession"] = df_bilans[intervenant_col].map(get_profession)
+        def _categorize(name):
+            if name is None or pd.isna(name):
+                return "Autre"
+            name_lower = str(name).lower()
+            for m in medecins:
+                if m.lower() in name_lower:
+                    return "Médecin"
+            for i in infirmieres:
+                if i.lower() in name_lower:
+                    return "Infirmier/Infirmière"
+            if name_lower.startswith("dr") or name_lower.startswith("dr."):
+                return "Médecin"
+            if name_lower.startswith("inf") or "infirm" in name_lower:
+                return "Infirmier/Infirmière"
+            return "Autre"
+
+        df_bilans["profession"] = df_bilans[intervenant_col].map(_categorize)
         indicators["bilans_par_profession"] = df_bilans["profession"].value_counts(dropna=False)
+        indicators["bilans_medecins"] = int(
+            (df_bilans["profession"] == "Médecin").sum()
+        )
+        indicators["bilans_infirmieres"] = int(
+            (df_bilans["profession"] == "Infirmier/Infirmière").sum()
+        )
+        indicators["bilans_autres_intervenants"] = int(
+            (df_bilans["profession"] == "Autre").sum()
+        )
 
     if "établissement" in df_bilans.columns:
         etab_series = df_bilans["établissement"].map(standardize_etablissement)

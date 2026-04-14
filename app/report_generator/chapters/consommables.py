@@ -12,6 +12,11 @@ INTRO_TEXT = (
     "et de substances, la nutrition et le bien-être."
 )
 
+BILAN_ACTIONS_TEXT = (
+    "Le bilan des actions d'éducation sanitaire détaille les thèmes abordés "
+    "et les établissements impliqués tout au long de l'année."
+)
+
 CONSOMMABLES_TEXT = (
     "La distribution de matériel de prévention (préservatifs, éthylotests, livrets "
     "d'information…) constitue un levier important de sensibilisation. "
@@ -21,11 +26,6 @@ CONSOMMABLES_TEXT = (
 ACTIONS_TEXT = (
     "Les actions de prévention sont organisées sur les différents campus et sites "
     "des établissements partenaires."
-)
-
-BILAN_ACTIONS_TEXT = (
-    "Le bilan des actions d'éducation sanitaire détaille les thèmes abordés "
-    "et les établissements impliqués tout au long de l'année."
 )
 
 
@@ -41,78 +41,50 @@ def build_consommables_chapter(
 
     builder.add_chapter("Éducation à la santé", INTRO_TEXT)
 
-    # --- Consommables ---
-    builder.add_section("Consommables distribués", CONSOMMABLES_TEXT)
-    builder.add_image(
-        "output/charts/consommables.png",
-        caption="Consommables distribués",
-    )
-
-    # --- Actions par campus ---
-    builder.add_section("Actions par campus", ACTIONS_TEXT)
-    builder.add_image(
-        "output/charts/actions_par_campus.png",
-        caption="Actions de prévention par campus",
-    )
-    builder.add_image(
-        "output/charts/actions_par_site_lisible.png",
-        caption="Actions de prévention par site",
-    )
-
-    # --- Bilan des actions (nouveaux graphiques) ---
+    # --- Bilan des actions ---
     builder.add_section("Bilan des actions d'éducation sanitaire", BILAN_ACTIONS_TEXT)
     builder.add_image(
         "output/charts/bilan_actions_par_theme.png",
         caption="Actions par thème",
     )
     builder.add_image(
-        "output/charts/bilan_actions_par_campus.png",
-        caption="Actions par campus (bilan)",
+        "output/charts/actions_par_site_lisible.png",
+        caption="Actions de prévention par site",
+    )
+
+    # --- Consommables distribués ---
+    builder.add_section("Consommables distribués", CONSOMMABLES_TEXT)
+    builder.add_image(
+        "output/charts/consommables_bilan_actions.png",
+        caption="Consommables distribués lors des actions",
     )
 
     # Chiffres clés avec flèches bleues
-    if "nombres_actions" in consommables_stats:
-        builder.add_blue_arrow_paragraph(
-            f"Nombre d'actions de prévention : "
-            f"{int(consommables_stats['nombres_actions'])}"
-        )
-
     if "nombre_actions" in bilan_actions_stats:
         builder.add_blue_arrow_paragraph(
-            f"Actions d'éducation sanitaire (bilan) : "
+            f"Actions d'éducation sanitaire : "
             f"{int(bilan_actions_stats['nombre_actions'])}"
         )
 
-    total_preservatifs = sum(
-        int(consommables_stats.get(f"total_{k}", 0))
-        for k in [
-            "preservatifs_externes",
-            "preservatifs_banane",
-            "preservatifs_fraise",
-            "preservatifs_sans_latex",
-            "preservatifs_internes",
-        ]
-    )
-    if total_preservatifs:
+    if "total_participants" in bilan_actions_stats:
         builder.add_blue_arrow_paragraph(
-            f"Préservatifs distribués : {total_preservatifs}"
+            f"Participants touchés : "
+            f"{int(bilan_actions_stats['total_participants'])}"
         )
 
     conso_indicators = {}
-    if "nombres_actions" in consommables_stats:
-        conso_indicators["Nombre d'actions de prévention"] = int(
-            consommables_stats["nombres_actions"]
-        )
-    if total_preservatifs:
-        conso_indicators["Préservatifs distribués"] = total_preservatifs
-    if "total_ethylo_0_5" in consommables_stats:
-        conso_indicators["Éthylotests 0,5‰ distribués"] = int(
-            consommables_stats["total_ethylo_0_5"]
-        )
-    if "total_packs_arret_tabac" in consommables_stats:
-        conso_indicators["Packs arrêt tabac distribués"] = int(
-            consommables_stats["total_packs_arret_tabac"]
-        )
+    if "nombre_actions" in bilan_actions_stats:
+        conso_indicators["Nombre d'actions"] = int(bilan_actions_stats["nombre_actions"])
+    if "total_participants" in bilan_actions_stats:
+        conso_indicators["Participants touchés"] = int(bilan_actions_stats["total_participants"])
+    for key in ("total_preservatifs_externes", "total_preservatifs_internes"):
+        if key in bilan_actions_stats:
+            label = key.replace("total_", "").replace("_", " ").capitalize()
+            conso_indicators[label] = int(bilan_actions_stats[key])
+    if "total_ethylo_0_5" in bilan_actions_stats:
+        conso_indicators["Éthylotests 0,5‰"] = int(bilan_actions_stats["total_ethylo_0_5"])
+    if "total_packs_arret_tabac" in bilan_actions_stats:
+        conso_indicators["Packs arrêt tabac"] = int(bilan_actions_stats["total_packs_arret_tabac"])
 
     if conso_indicators:
         builder.add_key_indicators_table(
