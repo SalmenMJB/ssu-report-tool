@@ -21,28 +21,40 @@ ACTIVITE_TEXT = (
 def build_css_chapter(
     builder: ReportBuilder,
     activite_stats: dict,
+    css_stats: dict = None,
 ) -> None:
     """Construit le chapitre Centre de santé sexuelle."""
+
+    if css_stats is None:
+        css_stats = {}
 
     builder.add_chapter("Centre de santé sexuelle", INTRO_TEXT)
 
     builder.add_section("Activité du centre", ACTIVITE_TEXT)
 
+    # Graphique des motifs réels CSS (si disponible)
+    builder.add_image(
+        "output/charts/motifs_reels_css.png",
+        caption="Motifs réels au Centre de Santé Sexuelle",
+    )
+
     # Chiffres clés avec flèches bleues
-    if "consultations_css" in activite_stats:
+    css_total = css_stats.get(
+        "total_consultations_css",
+        activite_stats.get("consultations_css", None),
+    )
+    if css_total is not None:
         builder.add_blue_arrow_paragraph(
-            f"Consultations centre de planification : "
-            f"{int(activite_stats['consultations_css'])}"
+            f"Consultations centre de planification : {int(css_total)}"
         )
 
     css_indicators = {}
-    if "consultations_css" in activite_stats:
-        css_indicators["Consultations centre de planification"] = int(
-            activite_stats["consultations_css"]
-        )
+    if css_total is not None:
+        css_indicators["Consultations centre de planification"] = int(css_total)
     if css_indicators:
         builder.add_key_indicators_table(
             css_indicators, title="Chiffres clés – Centre de santé sexuelle"
         )
 
     builder.add_editable_comment_zone()
+

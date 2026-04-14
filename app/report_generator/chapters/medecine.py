@@ -33,8 +33,12 @@ def build_medecine_chapter(
     builder: ReportBuilder,
     df_activite,
     activite_stats: dict,
+    bilans_professionnels_stats: dict = None,
 ) -> None:
     """Construit le chapitre Médecine générale."""
+
+    if bilans_professionnels_stats is None:
+        bilans_professionnels_stats = {}
 
     builder.add_chapter("Médecine générale", INTRO_TEXT)
 
@@ -98,6 +102,14 @@ def build_medecine_chapter(
     builder.add_image(
         "output/charts/bilans_par_filiere.png",
         caption="Bilans par filière",
+    )
+    builder.add_image(
+        "output/charts/bilans_par_profession.png",
+        caption="Bilans par profession (médecins vs infirmières)",
+    )
+    builder.add_image(
+        "output/charts/bilans_medecins_vs_infirmieres.png",
+        caption="Comparaison bilans médecins / infirmières",
     )
 
     # --- Aménagements ---
